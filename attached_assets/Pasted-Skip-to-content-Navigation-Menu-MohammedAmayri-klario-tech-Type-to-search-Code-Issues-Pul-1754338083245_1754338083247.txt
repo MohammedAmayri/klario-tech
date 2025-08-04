@@ -1,0 +1,80 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Remove rate limiting feature to allow deployment to proceed successfully #20
+Jobs
+Run details
+build-and-deploy
+failed 2 minutes ago in 5m 8s
+Search logs
+2s
+18s
+7s
+0s
+8s
+30s
+16s
+16s
+3s
+13s
+3m 12s
+out: 21f635d10081_klario-app | 
+out: 21f635d10081_klario-app | 7:17:56 PM [express] serving on port 5000
+out: 21f635d10081_klario-app | npm error path /app
+out: 21f635d10081_klario-app | npm error command failed
+out: 21f635d10081_klario-app | npm error signal SIGTERM
+out: 21f635d10081_klario-app | npm error command sh -c NODE_ENV=production node dist/index.js
+out: 21f635d10081_klario-app | npm notice
+out: 21f635d10081_klario-app | npm notice New major version of npm available! 10.8.2 -> 11.5.2
+out: 21f635d10081_klario-app | npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+out: 21f635d10081_klario-app | npm notice To update run: npm install -g npm@11.5.2
+out: 21f635d10081_klario-app | npm notice
+out: 21f635d10081_klario-app | npm error A complete log of this run can be found in: /home/nodeuser/.npm/_logs/2025-08-04T19_17_51_***1Z-debug-0.log
+out: === Caddy Logs ===
+out: Attaching to klario-caddy
+out: klario-caddy  | {"level":"info","ts":1754337723.7838316,"msg":"GOMEMLIMIT is updated","package":"github.com/KimMachineGun/automemlimit/memlimit","GOMEMLIMIT":1856765952,"previous":9***3372036854775807}
+out: klario-caddy  | {"level":"info","ts":1754337723.784203,"msg":"using config from file","file":"/etc/caddy/Caddyfile"}
+out: klario-caddy  | {"level":"warn","ts":1754337723.785151,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-For: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"warn","ts":1754337723.7860782,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Proto: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"info","ts":1754337723.7881932,"msg":"maxprocs: No GOMAXPROCS change to reset"}
+out: klario-caddy  | Error: adapting config using caddyfile: parsing caddyfile tokens for 'handle_errors': parsing caddyfile tokens for 'handle': parsing caddyfile tokens for 'respond': unrecognized subdirective 'header', at /etc/caddy/Caddyfile:95, at /etc/caddy/Caddyfile:97, at /etc/caddy/Caddyfile:105
+out: klario-caddy  | {"level":"info","ts":1754337784.2975261,"msg":"maxprocs: Leaving GOMAXPROCS=1: CPU quota undefined"}
+out: klario-caddy  | {"level":"info","ts":1754337784.2981534,"msg":"GOMEMLIMIT is updated","package":"github.com/KimMachineGun/automemlimit/memlimit","GOMEMLIMIT":1856765952,"previous":9***3372036854775807}
+out: klario-caddy  | {"level":"info","ts":1754337784.2983365,"msg":"using config from file","file":"/etc/caddy/Caddyfile"}
+out: klario-caddy  | {"level":"warn","ts":1754337784.3003733,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-For: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"warn","ts":1754337784.3005323,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Proto: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"info","ts":1754337784.3020535,"msg":"maxprocs: No GOMAXPROCS change to reset"}
+out: klario-caddy  | Error: adapting config using caddyfile: parsing caddyfile tokens for 'handle_errors': parsing caddyfile tokens for 'handle': parsing caddyfile tokens for 'respond': unrecognized subdirective 'header', at /etc/caddy/Caddyfile:95, at /etc/caddy/Caddyfile:97, at /etc/caddy/Caddyfile:105
+out: klario-caddy  | {"level":"info","ts":1754337844.7916617,"msg":"maxprocs: Leaving GOMAXPROCS=1: CPU quota undefined"}
+out: klario-caddy  | {"level":"info","ts":1754337844.7921984,"msg":"GOMEMLIMIT is updated","package":"github.com/KimMachineGun/automemlimit/memlimit","GOMEMLIMIT":1856765952,"previous":9***3372036854775807}
+out: klario-caddy  | {"level":"info","ts":1754337844.79***554,"msg":"using config from file","file":"/etc/caddy/Caddyfile"}
+out: klario-caddy  | {"level":"warn","ts":1754337844.794531,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-For: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"warn","ts":1754337844.7946913,"logger":"caddyfile","msg":"Unnecessary header_up X-Forwarded-Proto: the reverse proxy's default behavior is to pass headers to the upstream"}
+out: klario-caddy  | {"level":"info","ts":1754337844.7966447,"msg":"maxprocs: No GOMAXPROCS change to reset"}
+out: klario-caddy  | Error: adapting config using caddyfile: parsing caddyfile tokens for 'handle_errors': parsing caddyfile tokens for 'handle': parsing caddyfile tokens for 'respond': unrecognized subdirective 'header', at /etc/caddy/Caddyfile:95, at /etc/caddy/Caddyfile:97, at /etc/caddy/Caddyfile:105
+out: === Container Status ===
+out:          Name                        Command                  State                Ports          
+out: --------------------------------------------------------------------------------------------------
+out: 21f635d10081_klario-app   docker-entrypoint.sh npm start   Exit 1                                 
+out: klario-backup             docker-entrypoint.sh sh -c ...   Restarting                             
+out: klario-caddy              caddy run --config /etc/ca ...   Restarting                             
+out: klario-postgres           docker-entrypoint.sh postgres    Up (healthy)   127.0.0.1:5432->5432/tcp
+out: klario-redis              docker-entrypoint.sh redis ...   Up (healthy)   127.0.0.1:6379->6379/tcp
+2025/08/04 20:05:03 Process exited with status 1
+0s
+1s
+0s
+0s
