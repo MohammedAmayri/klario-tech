@@ -14,6 +14,8 @@ export function log(message: string, source = "express") {
 }
 
 export function serveStatic(app: Express) {
+  // In Docker production: import.meta.dirname = "/app/dist", so we need "public"
+  // In local production: import.meta.dirname = "./dist", so we need "public"
   const clientPath = path.resolve(import.meta.dirname, "public");
   
   if (!fs.existsSync(clientPath)) {
