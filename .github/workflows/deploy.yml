@@ -182,6 +182,22 @@ jobs:
             echo "Please edit .env file with your actual values before running the application!"
           fi
           
+          # Update domain configuration for getklario.com
+          echo "🔧 Updating domain configuration to getklario.com..."
+          if grep -q "DOMAIN_NAME=" .env; then
+            sed -i "s/DOMAIN_NAME=.*/DOMAIN_NAME=getklario.com/" .env
+          else
+            echo "DOMAIN_NAME=getklario.com" >> .env
+          fi
+          
+          # Update SendGrid from email if it exists
+          if grep -q "SENDGRID_FROM_EMAIL=" .env; then
+            sed -i "s|SENDGRID_FROM_EMAIL=.*|SENDGRID_FROM_EMAIL=noreply@getklario.com|" .env
+            echo "✅ Updated SendGrid from email to noreply@getklario.com"
+          fi
+          
+          echo "✅ Domain configuration updated to getklario.com"
+          
           # Run database migrations (only on first deployment or when needed)
           if [ ! -f .db_initialized ]; then
             echo "Initializing database..."
