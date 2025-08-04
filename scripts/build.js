@@ -20,6 +20,12 @@ try {
     '--bundle',
     '--format=esm',
     '--outdir=dist',
+    '--external:./vite',
+    '--external:../vite.config',
+    '--external:vite',
+    '--external:@vitejs/plugin-react',
+    '--external:@replit/vite-plugin-runtime-error-modal',
+    '--external:@replit/vite-plugin-cartographer',
     '--define:import.meta.dirname=\'"."\''
   ].join(' '), { cwd: projectRoot, stdio: 'inherit' });
   
