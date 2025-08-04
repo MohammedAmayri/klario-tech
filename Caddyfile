@@ -125,14 +125,7 @@ getklario.com, www.getklario.com {
 
 # WWW redirect removed - now handled in main site block above
 
-# Legacy domain redirect (remove after migration is complete)
-lkdevcontaineronline.online {
-    redir https://getklario.com{uri} permanent
-}
-
-www.lkdevcontaineronline.online {
-    redir https://getklario.com{uri} permanent
-}
+# Legacy domain redirects removed - focusing only on getklario.com
 
 # Health check endpoint (internal)
 :8080 {
