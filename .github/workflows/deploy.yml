@@ -101,7 +101,7 @@ jobs:
         sleep 15
         
         # Test if container is responding
-        curl -f http://localhost:3001/health || curl -f http://localhost:3001 || exit 1
+        curl -f http://localhost:3001/api/health || exit 1
         
         # Clean up test container
         docker stop test-container
