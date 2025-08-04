@@ -1,5 +1,5 @@
 # Multi-stage build for production-ready Klario NFC Platform
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -22,7 +22,7 @@ RUN npm ci
 COPY . .
 
 # Build the application
-RUN npm run build
+RUN node scripts/build.js
 
 # Production image
 FROM base AS runner

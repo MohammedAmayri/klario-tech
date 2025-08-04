@@ -10,7 +10,7 @@ const projectRoot = resolve(__dirname, '..');
 
 try {
   console.log('Building frontend...');
-  execSync('vite build', { cwd: projectRoot, stdio: 'inherit' });
+  execSync('npx vite build', { cwd: projectRoot, stdio: 'inherit' });
   
   console.log('Building backend...');
   execSync([

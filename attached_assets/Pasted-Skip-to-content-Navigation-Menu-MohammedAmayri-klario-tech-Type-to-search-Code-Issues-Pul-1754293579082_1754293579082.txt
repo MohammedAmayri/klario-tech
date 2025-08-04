@@ -1,0 +1,78 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Improve build process for faster and more reliable application deploy… #3
+Jobs
+Run details
+test
+failed 7 minutes ago in 46s
+Search logs
+0s
+19s
+1s
+2s
+11s
+Run npm ci
+  
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'react-router@7.7.1',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'react-router-dom@7.7.1',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+added 526 packages, and audited 527 packages in 11s
+68 packages are looking for funding
+  run `npm fund` for details
+10 vulnerabilities (3 low, 7 moderate)
+To address issues that do not require attention, run:
+  npm audit fix
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+10s
+Run npm run check
+  
+> rest-express@1.0.0 check
+> tsc
+0s
+Run node scripts/build.js
+Building frontend...
+/bin/sh: 1: vite: not found
+Build failed: Command failed: vite build
+Error: Process completed with exit code 1.
+0s
+0s
+0s
+Post job cleanup.
+/usr/bin/git version
+git version 2.50.1
+Temporarily overriding HOME='/home/runner/work/_temp/50389979-a378-464d-922a-f35430db27db' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/klario-tech/klario-tech
+/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+1s
+0s

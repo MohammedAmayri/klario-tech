@@ -7,7 +7,7 @@ on:
     branches: [ main, master ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   DOCKER_IMAGE_NAME: klario
   DOCKER_TAG: latest
 
