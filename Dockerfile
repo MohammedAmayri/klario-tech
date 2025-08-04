@@ -28,25 +28,24 @@ RUN node scripts/build.js
 FROM base AS runner
 WORKDIR /app
 
+# Install curl for health checks (before creating users)
+RUN apk add --no-cache curl
+
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nodeuser
-
-# Install curl for health checks (as root)
-USER root
-RUN apk add --no-cache curl
 
 # Copy built application
 COPY --from=builder --chown=nodeuser:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodeuser:nodejs /app/package*.json ./
 
-# Install production dependencies (as root to avoid permission issues)
+# Install production dependencies
 RUN npm ci --only=production && npm cache clean --force
 
 # Create healthcheck script
 RUN printf 'const http=require("http");const options={host:"0.0.0.0",port:5000,path:"/health",timeout:5000};const req=http.request(options,(res)=>{process.exit(res.statusCode===200?0:1)});req.on("error",()=>process.exit(1));req.on("timeout",()=>process.exit(1));req.end();' > /app/healthcheck.js
 
-# Switch to non-root user for security
+# Switch to non-root user
 USER nodeuser
 
 # Set Docker environment flag
