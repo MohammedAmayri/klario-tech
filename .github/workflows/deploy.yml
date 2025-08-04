@@ -92,16 +92,21 @@ jobs:
         # Run container in background for testing
         docker run -d -p 3001:5000 \
           --name test-container \
-          -e NODE_ENV=test \
+          -e NODE_ENV=production \
           -e SESSION_SECRET=test_secret \
-          -e DATABASE_URL=postgresql://test:test@localhost:5432/test \
+          -e DATABASE_URL=postgresql://test:test@host.docker.internal:5432/test \
           ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }}
         
         # Wait for container to start
         sleep 15
         
-        # Test if container is responding
-        curl -f http://localhost:3001/api/health || exit 1
+        # Check container logs for debugging
+        echo "=== Container Logs ==="
+        docker logs test-container
+        
+        # Test if container is responding (using correct /health endpoint)
+        echo "=== Testing Health Endpoint ==="
+        curl -f http://localhost:3001/health -v || exit 1
         
         # Clean up test container
         docker stop test-container
