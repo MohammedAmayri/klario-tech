@@ -14,6 +14,13 @@ import {
 import { businesses, customers, campaigns } from "@shared/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
 
+// Extend session type to include superAdminId
+declare module 'express-session' {
+  interface SessionData {
+    superAdminId?: string;
+  }
+}
+
 const router = Router();
 
 // Middleware to check if super admin is authenticated
@@ -222,7 +229,7 @@ router.get("/dashboard", requireSuperAdmin, async (req: any, res) => {
       .orderBy(desc(platformStats.date))
       .limit(30);
     
-    await logAdminAction(req.superAdmin.id, "view_dashboard", "dashboard", null, null, req);
+    await logAdminAction(req.superAdmin.id, "view_dashboard", "dashboard", undefined, null, req);
     
     res.json({
       statistics: {
@@ -254,7 +261,7 @@ router.get("/businesses", requireSuperAdmin, async (req: any, res) => {
     
     const [totalCount] = await db.select({ count: count() }).from(businesses);
     
-    await logAdminAction(req.superAdmin.id, "view_businesses", "business", null, { page, limit }, req);
+    await logAdminAction(req.superAdmin.id, "view_businesses", "business", undefined, { page, limit }, req);
     
     res.json({
       businesses: allBusinesses,
@@ -378,7 +385,7 @@ router.get("/audit-log", requireSuperAdmin, async (req: any, res) => {
     
     const [totalCount] = await db.select({ count: count() }).from(adminActionLogs);
     
-    await logAdminAction(req.superAdmin.id, "view_audit_log", "audit_log", null, { page, limit }, req);
+    await logAdminAction(req.superAdmin.id, "view_audit_log", "audit_log", undefined, { page, limit }, req);
     
     res.json({
       logs,
