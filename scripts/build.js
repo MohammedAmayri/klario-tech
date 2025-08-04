@@ -14,7 +14,7 @@ try {
   
   console.log('Building backend...');
   execSync([
-    'esbuild server/index.ts',
+    'npx esbuild server/index.ts',
     '--platform=node',
     '--packages=external', 
     '--bundle',
