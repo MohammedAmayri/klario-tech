@@ -4,7 +4,7 @@ services:
   # Caddy reverse proxy with SSL termination
   caddy:
     image: caddy:2-alpine
-    container_name: klario-caddy
+    container_name: caddy-proxy
     restart: unless-stopped
     ports:
       - "80:80"

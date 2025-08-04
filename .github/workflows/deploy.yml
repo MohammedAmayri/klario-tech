@@ -228,18 +228,30 @@ jobs:
           # Check if containers are running
           docker-compose -f docker-compose.prod.yml ps
           
-          # Test application health
+          # Test application health with better error handling
+          echo "Checking container status first..."
+          docker-compose -f docker-compose.prod.yml ps
+          
+          echo "Checking container logs for errors..."
+          docker-compose -f docker-compose.prod.yml logs --tail=10 klario-app
+          
           for i in {1..10}; do
-            if curl -f http://localhost/health || curl -f http://localhost:5000/health; then
+            # Test direct application connection first
+            if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -f http://localhost:5000/health; then
               echo "✅ Application is responding to health checks"
               break
             elif [ $i -eq 10 ]; then
               echo "❌ Application failed health check after 10 attempts"
-              docker-compose -f docker-compose.prod.yml logs klario-app
+              echo "=== Application Logs ==="
+              docker-compose -f docker-compose.prod.yml logs --tail=50 klario-app
+              echo "=== Caddy Logs ==="
+              docker-compose -f docker-compose.prod.yml logs --tail=20 caddy
+              echo "=== Container Status ==="
+              docker-compose -f docker-compose.prod.yml ps
               exit 1
             else
               echo "Attempt $i: Application not ready, waiting..."
-              sleep 10
+              sleep 15
             fi
           done
           

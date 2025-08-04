@@ -1,0 +1,76 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Ensure site uses correct security certificate by removing old domain #18
+Jobs
+Run details
+build-and-deploy
+failed 20 minutes ago in 3m 48s
+Search logs
+1s
+3s
+1s
+0s
+4s
+30s
+16s
+15s
+2s
+14s
+2m 19s
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+err: curl: (7) Failed to connect to localhost port 80 after 0 ms: Could not connect to server
+err:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+err:                                  Dload  Upload   Total   Spent    Left  Speed
+err: 
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+err: curl: (7) Failed to connect to localhost port 5000 after 1 ms: Could not connect to server
+err:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+out: ❌ Application failed health check after 10 attempts
+err:                                  Dload  Upload   Total   Spent    Left  Speed
+err: 
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+err: curl: (7) Failed to connect to localhost port 80 after 1 ms: Could not connect to server
+err:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+err:                                  Dload  Upload   Total   Spent    Left  Speed
+err: 
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+err: curl: (7) Failed to connect to localhost port 5000 after 0 ms: Could not connect to server
+out: Attaching to 21f635d10081_klario-app
+out: 21f635d10081_klario-app | 
+out: 21f635d10081_klario-app | > rest-express@1.0.0 start
+out: 21f635d10081_klario-app | > NODE_ENV=production node dist/index.js
+out: 21f635d10081_klario-app | 
+out: 21f635d10081_klario-app | 7:17:56 PM [express] serving on port 5000
+out: 21f635d10081_klario-app | npm error path /app
+out: 21f635d10081_klario-app | npm error command failed
+out: 21f635d10081_klario-app | npm error signal SIGTERM
+out: 21f635d10081_klario-app | npm error command sh -c NODE_ENV=production node dist/index.js
+out: 21f635d10081_klario-app | npm notice
+out: 21f635d10081_klario-app | npm notice New major version of npm available! 10.8.2 -> 11.5.2
+out: 21f635d10081_klario-app | npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+out: 21f635d10081_klario-app | npm notice To update run: npm install -g npm@11.5.2
+out: 21f635d10081_klario-app | npm notice
+out: 21f635d10081_klario-app | npm error A complete log of this run can be found in: /home/nodeuser/.npm/_logs/2025-08-04T19_17_51_***1Z-debug-0.log
+2025/08/04 19:26:48 Process exited with status 1
+0s
+1s
+0s
+0s
