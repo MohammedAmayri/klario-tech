@@ -46,7 +46,7 @@ jobs:
       run: npm run check
     
     - name: Build application
-      run: npm run build
+      run: node scripts/build.js
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/klario_test
         NODE_ENV: test
