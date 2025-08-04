@@ -1,7 +1,7 @@
 # Klario NFC Platform - Production Caddy Configuration
 # Primary domain configuration
 
-getklario.com {
+getklario.com, www.getklario.com {
     # Reverse proxy to Klario application
     reverse_proxy klario-app:5000 {
         # Health check endpoint
@@ -123,10 +123,7 @@ getklario.com {
     }
 }
 
-# WWW redirect  
-www.getklario.com {
-    redir https://getklario.com{uri} permanent
-}
+# WWW redirect removed - now handled in main site block above
 
 # Legacy domain redirect (remove after migration is complete)
 lkdevcontaineronline.online {
