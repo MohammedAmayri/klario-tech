@@ -1,0 +1,115 @@
+DigitalOcean
+Projects
+Manage
+App Platform
+Agent Platform
+New
+Droplets
+GPU Droplets
+New
+Functions
+Kubernetes
+Volumes Block Storage
+Databases
+Spaces Object Storage
+Container Registry
+Backups & Snapshots
+Networking
+Monitoring
+SaaS Add-Ons
+By DigitalOcean
+Billing
+Support
+Settings
+API
+Marketplace
+Product Docs
+What's New
+Search by resource name or public IP (Ctrl+B)
+Droplets
+ubuntu-s-1vcpu-1gb-amd-lon1-01
+lon1
+Domains
+lkdevcontaineronline.online
+MTavatar
+
+i.can.2028.tcc@gmail.com
+Owner
+ 
+My Account
+ 
+Feature Preview
+Create a Team
+ 
+Sign Out
+treasure
+Set up a referral link and earn free credits
+Learn more
+My Team
+Estimated costs: $0.00
+
+Back to Domains
+lkdevcontaineronline.online
+in
+first-project
+What's next? You need to update your nameservers with your domain registrar for the records below to take effect. Learn how to do that.
+Create new record
+Learn
+A
+ 
+AAAA
+ 
+CNAME
+ 
+MX
+ 
+TXT
+ 
+NS
+ 
+SRV
+ 
+CAA
+Use @ to create the record at the root of the domain or enter a hostname to create it elsewhere. A records are for IPv4 addresses only and tell a request where your domain should direct to.
+
+Hostname
+Enter @ or hostname
+ 
+Will direct to
+Select resource or enter custom IP
+ubuntu-s-1vcpu-1gb-amd-lon1-01
+LON1 / 104.248.167.228
+46.101.67.240
+LON1 / ubuntu-s-1vcpu-1gb-amd-lon1-01
+ 
+TTL (Seconds)
+3600
+Enter TTL 
+DNS records
+Type	Hostname	Value	TTL (seconds)	
+CNAME	
+www.lkdevcontaineronline.onlineCopy	is an alias of 
+lkdevcontaineronline.online.Copy	
+43200 Copy
+More 
+A	
+lkdevcontaineronline.onlineCopy	directs to 
+46.101.67.240Copy	
+3600 Copy
+More 
+NS	
+lkdevcontaineronline.onlineCopy	directs to 
+ns1.digitalocean.com.Copy	
+1800 Copy
+More 
+NS	
+lkdevcontaineronline.onlineCopy	directs to 
+ns2.digitalocean.com.Copy	
+1800 Copy
+More 
+NS	
+lkdevcontaineronline.onlineCopy	directs to 
+ns3.digitalocean.com.Copy	
+1800 Copy
+More 
+Support Status Docs Tutorials Blog Pricing Careers Terms Privacy Refer your friends for $

@@ -1,0 +1,116 @@
+DigitalOcean
+Projects
+first-project
+New Project
+Manage
+App Platform
+Agent Platform
+New
+Droplets
+GPU Droplets
+New
+Functions
+Kubernetes
+Volumes Block Storage
+Databases
+Spaces Object Storage
+Container Registry
+Backups & Snapshots
+Networking
+Monitoring
+SaaS Add-Ons
+By DigitalOcean
+Billing
+Support
+Settings
+API
+Marketplace
+Product Docs
+What's New
+Search by resource name or public IP (Ctrl+B)
+Droplets
+ubuntu-s-1vcpu-1gb-amd-lon1-01
+lon1
+Domains
+lkdevcontaineronline.online
+MTavatar
+
+i.can.2028.tcc@gmail.com
+Owner
+ 
+My Account
+ 
+Feature Preview
+Create a Team
+ 
+Sign Out
+treasure
+Set up a referral link and earn free credits
+Learn more
+My Team
+Estimated costs: $0.00
+
+first-project 
+Update your project information under Settings
+Resources
+ 
+Activity
+ 
+Settings
+Droplets (1)
+ubuntu-s-1vcpu-1gb-amd-lon1-01
+LON1 / 2GB / 25GB Disk
+46.101.67.240 Copy
+
+Domains (1)
+lkdevcontaineronline.online
+1 a / 1 cNAME / 3 nS / 1 sOA
+Create something new
+Create an AI Inference Endpoint
+Serverless access to LLM models
+
+Create a Managed Database
+Worry-free database management
+
+Create a GPU Droplet
+Virtualized GPUs available on demand
+
+Start Using Spaces
+Deliver data with scalable object storage
+
+Create an AI Agent
+Fully-managed AI agent development
+
+Spin up a Load Balancer
+Distribute traffic between multiple Droplets
+
+Build on what you have
+Add a disk to your Droplet
+Create a block storage volume
+
+Take a snapshot
+Make on-demand copies of Droplets
+
+Secure your Droplets
+Create a cloud firewall
+
+Start using Reserved IPs
+Redirect Droplet traffic quickly
+
+Track more Droplet metrics
+Enable the DigitalOcean agent
+
+Learn more
+Product Docs
+Technical overviews, how-tos, release notes, and support material
+
+Tutorials
+DevOps and development guidelines
+
+API & CLI Docs
+Run your resources programmatically
+
+Ask a question
+Connect, share and learn
+
+Support Status Docs Tutorials Blog Pricing Careers Terms Privacy Refer your friends for $
