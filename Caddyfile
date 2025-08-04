@@ -58,25 +58,7 @@ getklario.com, www.getklario.com {
         }
     }
 
-    # Rate limiting (adjust as needed)
-    rate_limit {
-        zone static {
-            key {remote_host}
-            events 100
-            window 1m
-        }
-        zone api {
-            key {remote_host}
-            events 60
-            window 1m
-        }
-    }
-
-    # API endpoints with stricter rate limiting
-    @api_routes {
-        path /api/*
-    }
-    rate_limit @api_routes api
+    # Rate limiting removed - not available in stock Caddy image
 
     # Static files caching
     @static {
