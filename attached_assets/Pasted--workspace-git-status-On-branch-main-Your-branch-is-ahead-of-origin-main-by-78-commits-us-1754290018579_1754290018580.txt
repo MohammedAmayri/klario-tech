@@ -1,0 +1,51 @@
+~/workspace$ git status
+On branch main
+Your branch is ahead of 'origin/main' by 78 commits.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+~/workspace$ git push
+Enumerating objects: 929, done.
+Counting objects: 100% (929/929), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (857/857), done.
+Writing objects: 100% (929/929), 8.01 MiB | 5.46 MiB/s, done.
+Total 929 (delta 666), reused 166 (delta 61), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (666/666), done.
+remote: fatal: did not receive expected object 8e5478d2513e0e6d1e155a9b71403ec8d469e23b
+error: remote unpack failed: index-pack failed
+To https://github.com/MohammedAmayri/klario-tech
+ ! [remote rejected] main -> main (failed)
+error: failed to push some refs to 'https://github.com/MohammedAmayri/klario-tech'
+~/workspace$ # Create your first commit
+git commit -m "Initial commit: Complete Klario NFC Platform with production deployment infrastructure
+
+Features:
+- React frontend with Swedish/English i18n
+- Express.js backend with PostgreSQL database
+- SMS/Email campaign management with AI enhancement
+- Complete Docker production deployment setup
+- Multi-channel customer engagement platform")Swish)
+On branch main
+Your branch is ahead of 'origin/main' by 78 commits.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+~/workspace$ git remote -v
+origin  https://github.com/MohammedAmayri/klario-tech (fetch)
+origin  https://github.com/MohammedAmayri/klario-tech (push)
+~/workspace$ # Push to main branch
+git push -u origin main
+Enumerating objects: 929, done.
+Counting objects: 100% (929/929), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (857/857), done.
+Writing objects: 100% (929/929), 8.01 MiB | 5.36 MiB/s, done.
+Total 929 (delta 666), reused 166 (delta 61), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (666/666), done.
+remote: fatal: did not receive expected object 8e5478d2513e0e6d1e155a9b71403ec8d469e23b
+error: remote unpack failed: index-pack failed
+To https://github.com/MohammedAmayri/klario-tech
+ ! [remote rejected] main -> main (failed)
+error: failed to push some refs to 'https://github.com/MohammedAmayri/klario-tech'
+~/workspace$ 

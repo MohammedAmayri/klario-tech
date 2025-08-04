@@ -1,0 +1,241 @@
+name: Deploy Klario to Production
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  NODE_VERSION: '18'
+  DOCKER_IMAGE_NAME: klario
+  DOCKER_TAG: latest
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: klario_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run TypeScript check
+      run: npm run check
+    
+    - name: Build application
+      run: npm run build
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/klario_test
+        NODE_ENV: test
+    
+    - name: Test application startup
+      run: |
+        # Start the app in background
+        npm start &
+        APP_PID=$!
+        
+        # Wait for app to start
+        sleep 10
+        
+        # Test if app is responding
+        curl -f http://localhost:5000/health || curl -f http://localhost:5000 || exit 1
+        
+        # Clean up
+        kill $APP_PID
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/klario_test
+        NODE_ENV: test
+        SESSION_SECRET: test_session_secret_for_ci
+        OPENAI_API_KEY: test_key
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} .
+        
+    - name: Test Docker image
+      run: |
+        # Run container in background for testing
+        docker run -d -p 3001:5000 \
+          --name test-container \
+          -e NODE_ENV=test \
+          -e SESSION_SECRET=test_secret \
+          -e DATABASE_URL=postgresql://test:test@localhost:5432/test \
+          ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }}
+        
+        # Wait for container to start
+        sleep 15
+        
+        # Test if container is responding
+        curl -f http://localhost:3001/health || curl -f http://localhost:3001 || exit 1
+        
+        # Clean up test container
+        docker stop test-container
+        docker rm test-container
+    
+    - name: Save Docker image
+      run: |
+        docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} | gzip > klario-app.tar.gz
+    
+    - name: Prepare deployment on server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        script: |
+          # Create deployment directory
+          sudo rm -rf /tmp/klario-deploy
+          mkdir -p /tmp/klario-deploy
+          
+          # Stop existing containers gracefully (but keep data)
+          if [ -f /home/${{ secrets.DO_USERNAME }}/klario/docker-compose.prod.yml ]; then
+            cd /home/${{ secrets.DO_USERNAME }}/klario
+            docker-compose -f docker-compose.prod.yml stop klario-app || true
+          fi
+          
+          # Clean up old images to save space
+          docker image prune -f || true
+          docker rmi klario:latest || true
+          
+          # Ensure docker-compose is available
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+    
+    - name: Copy deployment files to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        source: "klario-app.tar.gz,docker-compose.prod.yml,Caddyfile,scripts/,env.production.template"
+        target: "/tmp/klario-deploy/"
+        
+    - name: Deploy application
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        script: |
+          # Set up deployment directory
+          sudo mkdir -p /home/${{ secrets.DO_USERNAME }}/klario
+          sudo chown -R ${{ secrets.DO_USERNAME }}:${{ secrets.DO_USERNAME }} /home/${{ secrets.DO_USERNAME }}/klario
+          cd /home/${{ secrets.DO_USERNAME }}/klario
+          
+          # Copy new files
+          cp -r /tmp/klario-deploy/* .
+          chmod +x scripts/*.sh
+          
+          # Load the new Docker image
+          echo "Loading new Klario application image..."
+          docker load < klario-app.tar.gz
+          
+          # Ensure .env file exists
+          if [ ! -f .env ]; then
+            echo "Warning: .env file not found. Creating from template..."
+            cp env.production.template .env
+            echo "Please edit .env file with your actual values before running the application!"
+          fi
+          
+          # Run database migrations (only on first deployment or when needed)
+          if [ ! -f .db_initialized ]; then
+            echo "Initializing database..."
+            docker-compose -f docker-compose.prod.yml up -d postgres redis
+            sleep 10
+            
+            # Wait for postgres to be ready
+            until docker-compose -f docker-compose.prod.yml exec -T postgres pg_isready -U klario_user -d klario; do
+              echo "Waiting for PostgreSQL..."
+              sleep 2
+            done
+            
+            touch .db_initialized
+            echo "Database initialization completed."
+          fi
+          
+          # Deploy with zero-downtime strategy
+          echo "Deploying Klario application..."
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # Wait for services to start
+          echo "Waiting for services to start..."
+          sleep 30
+          
+          # Health check
+          echo "Performing health checks..."
+          
+          # Check if containers are running
+          docker-compose -f docker-compose.prod.yml ps
+          
+          # Test application health
+          for i in {1..10}; do
+            if curl -f http://localhost/health || curl -f http://localhost:5000/health; then
+              echo "✅ Application is responding to health checks"
+              break
+            elif [ $i -eq 10 ]; then
+              echo "❌ Application failed health check after 10 attempts"
+              docker-compose -f docker-compose.prod.yml logs klario-app
+              exit 1
+            else
+              echo "Attempt $i: Application not ready, waiting..."
+              sleep 10
+            fi
+          done
+          
+          # Clean up
+          rm -f klario-app.tar.gz
+          rm -rf /tmp/klario-deploy
+          
+          echo "🚀 Deployment completed successfully!"
+          echo "Services status:"
+          docker-compose -f docker-compose.prod.yml ps
+          
+          # Show recent logs
+          echo "Recent application logs:"
+          docker-compose -f docker-compose.prod.yml logs --tail=20 klario-app
+    
+    - name: Cleanup local artifacts
+      if: always()
+      run: |
+        rm -f klario-app.tar.gz
+        docker rmi ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} || true

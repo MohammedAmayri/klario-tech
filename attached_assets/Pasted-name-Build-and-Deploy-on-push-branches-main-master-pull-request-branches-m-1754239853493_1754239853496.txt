@@ -1,0 +1,151 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 18
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Test application
+      run: |
+        # Start the app in background
+        npm start &
+        APP_PID=$!
+        
+        # Wait for app to start
+        sleep 5
+        
+        # Test if app is responding
+        curl -f http://localhost:3000 || exit 1
+        
+        # Clean up
+        kill $APP_PID
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      run: |
+        docker build -t simple-nodejs-app:latest .
+        
+    - name: Test Docker image locally
+      run: |
+        # Run container in background
+        docker run -d -p 3001:3000 --name test-container simple-nodejs-app:latest
+        
+        # Wait for container to start
+        sleep 10
+        
+        # Test if container is responding
+        curl -f http://localhost:3001 || exit 1
+        
+        # Clean up
+        docker stop test-container
+        docker rm test-container
+    
+    - name: Save Docker image
+      run: |
+        docker save simple-nodejs-app:latest | gzip > simple-nodejs-app.tar.gz
+    
+    - name: Prepare deployment on Digital Ocean
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        script: |
+          # Stop existing container if running (but don't remove)
+          docker stop simple-nodejs-app || true
+          
+          # Remove old image to save space
+          docker rmi simple-nodejs-app:latest || true
+          
+          # Clean up old tar file
+          rm -f simple-nodejs-app.tar.gz
+    
+    - name: Copy files to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        source: "simple-nodejs-app.tar.gz,docker-compose.yml,Caddyfile"
+        target: "/home/${{ secrets.DO_USERNAME }}/"
+        
+    - name: Setup application directory
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        script: |
+          # Create app directory and move files
+          mkdir -p /home/${{ secrets.DO_USERNAME }}/app
+          mv /home/${{ secrets.DO_USERNAME }}/docker-compose.yml /home/${{ secrets.DO_USERNAME }}/app/
+          mv /home/${{ secrets.DO_USERNAME }}/Caddyfile /home/${{ secrets.DO_USERNAME }}/app/
+          
+          # Install docker-compose if not present
+          if ! command -v docker-compose &> /dev/null; then
+            sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+          fi
+    
+    - name: Deploy with Docker Compose
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
+        key: ${{ secrets.DO_SSH_KEY }}
+        port: ${{ secrets.DO_PORT }}
+        script: |
+          # Load the Docker image
+          docker load < /home/${{ secrets.DO_USERNAME }}/simple-nodejs-app.tar.gz
+          
+          # Tag the image for docker-compose
+          docker tag simple-nodejs-app:latest simple-nodejs-app:latest
+          
+          # Deploy using docker-compose
+          cd /home/${{ secrets.DO_USERNAME }}/app
+          docker-compose down
+          docker-compose up -d
+          
+          # Wait for services to start
+          sleep 15
+          
+          # Test if the app is running through Caddy
+          curl -f http://localhost || curl -f http://localhost:3000 || exit 1
+          
+          # Clean up tar file
+          rm -f /home/${{ secrets.DO_USERNAME }}/simple-nodejs-app.tar.gz
+          
+          # Show running services
+          echo "✅ Deployment successful!"
+          echo "Running services:"
+          docker-compose ps

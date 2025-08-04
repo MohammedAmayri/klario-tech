@@ -1,0 +1,142 @@
+# Klario NFC Platform - Production Caddy Configuration
+# Replace 'yourdomain.com' with your actual domain name
+
+yourdomain.com {
+    # Reverse proxy to Klario application
+    reverse_proxy klario-app:5000 {
+        # Health check endpoint
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+        
+        # Load balancing (for future scaling)
+        lb_policy round_robin
+        
+        # Connection settings
+        transport http {
+            dial_timeout 10s
+            response_header_timeout 30s
+            expect_continue_timeout 5s
+            keepalive 30s
+            keepalive_idle_conns 10
+        }
+        
+        # Headers for proper forwarding
+        header_up Host {upstream_hostport}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Security headers
+    header {
+        # HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Content security
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Hide server info
+        -Server
+        
+        # CSP for NFC platform
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-ancestors 'self';"
+    }
+
+    # Enable compression
+    encode {
+        gzip 6
+        minimum_length 1000
+        match {
+            header Content-Type text/*
+            header Content-Type application/json*
+            header Content-Type application/javascript*
+            header Content-Type application/xml*
+        }
+    }
+
+    # Rate limiting (adjust as needed)
+    rate_limit {
+        zone static {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+        zone api {
+            key {remote_host}
+            events 60
+            window 1m
+        }
+    }
+
+    # API endpoints with stricter rate limiting
+    @api_routes {
+        path /api/*
+    }
+    rate_limit @api_routes api
+
+    # Static files caching
+    @static {
+        path_regexp \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|webp|avif)$
+    }
+    header @static {
+        Cache-Control "public, max-age=31536000, immutable"
+    }
+
+    # HTML files - shorter cache
+    @html {
+        path_regexp \.html$
+    }
+    header @html {
+        Cache-Control "public, max-age=3600"
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/klario-access.log {
+            roll_size 100MiB
+            roll_keep 5
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+
+    # Error handling
+    handle_errors {
+        @5xx expression {http.error.status_code} >= 500
+        handle @5xx {
+            respond "Service temporarily unavailable. Please try again later." 503 {
+                header Content-Type "text/plain; charset=utf-8"
+            }
+        }
+        
+        @4xx expression {http.error.status_code} >= 400 && {http.error.status_code} < 500
+        handle @4xx {
+            respond "Page not found." 404 {
+                header Content-Type "text/plain; charset=utf-8"
+            }
+        }
+    }
+}
+
+# WWW redirect
+www.yourdomain.com {
+    redir https://yourdomain.com{uri} permanent
+}
+
+# Health check endpoint (internal)
+:8080 {
+    bind 127.0.0.1
+    
+    handle /caddy-health {
+        respond "OK" 200
+    }
+    
+    handle {
+        respond "Not Found" 404
+    }
+}
