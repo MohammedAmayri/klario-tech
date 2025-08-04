@@ -53,15 +53,15 @@ jobs:
     
     - name: Test application startup
       run: |
-        # Start the app in background
-        npm start &
+        # Start the app in background from dist directory
+        cd dist && NODE_ENV=production node index.js &
         APP_PID=$!
         
         # Wait for app to start
         sleep 10
         
         # Test if app is responding
-        curl -f http://localhost:5000/health || curl -f http://localhost:5000 || exit 1
+        curl -f http://localhost:5000/api/health || curl -f http://localhost:5000 || exit 1
         
         # Clean up
         kill $APP_PID
