@@ -236,9 +236,17 @@ jobs:
           docker-compose -f docker-compose.prod.yml logs --tail=10 klario-app
           
           for i in {1..10}; do
-            # Test direct application connection first
-            if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -f http://localhost:5000/health; then
+            # Test application health using multiple methods
+            if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -f http://localhost:5000/health 2>/dev/null || \
+               docker-compose -f docker-compose.prod.yml exec -T klario-app node /app/healthcheck.js 2>/dev/null; then
               echo "✅ Application is responding to health checks"
+              
+              # Test external access through Caddy
+              if curl -f -k https://localhost/health 2>/dev/null || curl -f http://localhost/health 2>/dev/null; then
+                echo "✅ External access through Caddy is working"
+              else
+                echo "⚠️  Application healthy but external access may take a moment for SSL certificate provisioning"
+              fi
               break
             elif [ $i -eq 10 ]; then
               echo "❌ Application failed health check after 10 attempts"
@@ -248,6 +256,8 @@ jobs:
               docker-compose -f docker-compose.prod.yml logs --tail=20 caddy
               echo "=== Container Status ==="
               docker-compose -f docker-compose.prod.yml ps
+              echo "=== Checking if curl is available ==="
+              docker-compose -f docker-compose.prod.yml exec -T klario-app which curl || echo "curl not found"
               exit 1
             else
               echo "Attempt $i: Application not ready, waiting..."
