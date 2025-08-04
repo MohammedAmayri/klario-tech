@@ -45,6 +45,9 @@ RUN printf 'const http=require("http");const options={host:"0.0.0.0",port:5000,p
 # Switch to non-root user
 USER nodeuser
 
+# Set Docker environment flag
+ENV DOCKER_CONTAINER=true
+
 # Expose port
 EXPOSE 5000
 
