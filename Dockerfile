@@ -28,7 +28,7 @@ RUN node scripts/build.js
 FROM base AS runner
 WORKDIR /app
 
-# Install curl for health checks
+# Install curl for health checks before switching to non-root user
 RUN apk add --no-cache curl
 
 # Create non-root user for security
