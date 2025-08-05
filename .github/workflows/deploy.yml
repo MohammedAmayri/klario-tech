@@ -96,9 +96,23 @@
                   HELLOSMS_USERNAME=${{ secrets.HELLOSMS_USERNAME }}
                   HELLOSMS_PASSWORD=${{ secrets.HELLOSMS_PASSWORD }}
                   EOF
+                  
+              - name: Verify .env file created
+                run: |
+                  echo "Checking .env file creation:"
+                  ls -la .env || echo ".env file not found!"
+                  echo "Content preview:"
+                  head -3 .env || echo "Cannot read .env"
 
               - name: Save Docker image tarball
                 run: docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} | gzip > klario-app.tar.gz
+
+              - name: Verify files before copy
+                run: |
+                  echo "Files to be copied:"
+                  ls -la klario-app.tar.gz docker-compose.prod.yml Caddyfile .env scripts/
+                  echo "Current directory contents:"
+                  ls -la
 
               - name: Copy deploy artifacts to server
                 uses: appleboy/scp-action@v0.1.7
