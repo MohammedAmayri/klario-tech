@@ -14,7 +14,10 @@ RUN npm ci --only=production
 FROM base AS builder
 COPY package*.json ./
 RUN npm ci
+# Copy all source files needed for Tailwind CSS to scan
 COPY . .
+# Ensure PostCSS and Tailwind can process CSS properly
+ENV NODE_ENV=production
 RUN node scripts/build.js
 
 # 4) Final runtime image

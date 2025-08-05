@@ -10,7 +10,17 @@ const projectRoot = resolve(__dirname, '..');
 
 try {
   console.log('Building frontend...');
-  execSync('npx vite build', { cwd: projectRoot, stdio: 'inherit' });
+  console.log('Project root:', projectRoot);
+  console.log('Current directory:', process.cwd());
+  
+  // Set NODE_ENV to production for proper Tailwind CSS compilation
+  process.env.NODE_ENV = 'production';
+  
+  execSync('npx vite build', { 
+    cwd: projectRoot, 
+    stdio: 'inherit',
+    env: { ...process.env, NODE_ENV: 'production' }
+  });
   
   console.log('Building backend...');
   execSync([
