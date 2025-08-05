@@ -138,8 +138,10 @@
                     
                     echo "✅ .env file created with $(wc -l < .env) lines"
 
-                    # Bring up services
-                    docker-compose -f docker-compose.prod.yml pull
+                    # Pull only external images (not our local klario app)
+                    docker-compose -f docker-compose.prod.yml pull postgres redis caddy-proxy
+                    
+                    # Bring up all services
                     docker-compose -f docker-compose.prod.yml up -d
 
                     # 1) App container health

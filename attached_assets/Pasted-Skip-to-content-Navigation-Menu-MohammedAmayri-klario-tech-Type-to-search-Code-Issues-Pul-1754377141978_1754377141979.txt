@@ -1,0 +1,86 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Ensure environment variables are correctly passed during production d… #34
+Jobs
+Run details
+build-and-deploy
+failed now in 1m 38s
+Search logs
+1s
+5s
+1s
+0s
+2s
+15s
+26s
+17s
+0s
+15s
+15s
+# 1) App container health
+echo "== App Container Health =="
+for i in {1..10}; do
+  if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -fsS http://localhost:5000/health; then
+    echo "✅ App container healthy"; break
+  fi
+  sleep 5
+done
+
+# 2) Proxy/SSL health
+echo "== Proxy/SSL Health =="
+for i in {1..10}; do
+  if curl -fsS https://getklario.com/health; then
+    echo "✅ Proxy & SSL healthy"; break
+  fi
+  sleep 5
+done
+
+echo "🚀 Deployment completed successfully!"
+
+======END======
+out: The image klario:latest already exists, renaming the old one with ID sha256:5874f28892439334ea82abda0ae7b8d5d0a4052a0ef1a61324c3bfae6db55796 to empty string
+out: Loaded image: klario:latest
+out: ✅ .env file created with 10 lines
+err: Pulling postgres      ... 
+err: Pulling redis         ... 
+err: Pulling klario-app    ... 
+err: Pulling caddy-proxy   ... 
+err: Pulling klario-backup ... 
+err: Pulling klario-backup ... pulling from library/postgres
+err: Pulling redis         ... pulling from library/redis
+err: Pulling caddy-proxy   ... pulling from library/caddy
+err: Pulling klario-backup ... digest: sha256:1414298ea93186123a...
+err: Pulling klario-backup ... status: image is up to date for p...
+err: Pulling klario-backup ... done
+err: Pulling redis         ... digest: sha256:bb186d083732f669da...
+err: Pulling redis         ... status: image is up to date for r...
+err: Pulling redis         ... done
+err: Pulling postgres      ... pulling from library/postgres
+err: Pulling caddy-proxy   ... digest: sha256:ae4458638da8e1a91a...
+err: Pulling caddy-proxy   ... status: image is up to date for c...
+err: Pulling caddy-proxy   ... done
+err: Pulling postgres      ... digest: sha256:1414298ea93186123a...
+err: Pulling postgres      ... status: image is up to date for p...
+err: Pulling postgres      ... done
+err: Pulling klario-app    ... error
+err: ERROR: for klario-app  pull access denied for klario, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+err: pull access denied for klario, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+2025/08/05 06:58:08 Process exited with status 1
+0s
+0s
+0s
+0s
