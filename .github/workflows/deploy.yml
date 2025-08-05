@@ -58,7 +58,7 @@
                     node index.js &
                   APP_PID=$!
                   sleep 10
-                  curl -f http://localhost/health
+                  curl -f http://localhost:5000/health
                   kill $APP_PID
 
           build-and-deploy:
