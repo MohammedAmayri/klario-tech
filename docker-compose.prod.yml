@@ -1,38 +1,94 @@
-          # docker-compose.prod.yml (overrides)
-          version: '3.8'
+version: '3.8'
 
-          tervices:
-            klario-app:
-              build: false
-              image: yourregistry/klario:${TAG}
-              env_file:
-                - .env
+services:
+  klario-app:
+    image: klario:latest
+    container_name: klario-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "5000"
+    networks:
+      - klario-network
+    depends_on:
+      - postgres
+      - redis
 
-            proxy:
-              volumes:
-                - ./Caddyfile:/etc/caddy/Caddyfile:ro
-                - caddy_data:/data
-                - caddy_config:/config
+  caddy-proxy:
+    image: caddy:2-alpine
+    container_name: caddy-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - klario-network
+    depends_on:
+      - klario-app
 
-            db-backup:
-              image: postgres:15-alpine
-              container_name: klario-backup
-              restart: unless-stopped
-              environment:
-                POSTGRES_DB: klario
-                POSTGRES_USER: klario_user
-                POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-                BACKUP_RETENTION_DAYS: 7
-              volumes:
-                - postgres_backups:/backups
-                - ./scripts/backup.sh:/usr/local/bin/backup.sh:ro
-              networks:
-                - klario-network
-              depends_on:
-                - postgres
-              command: |
-                sh -c "while true; do /usr/local/bin/backup.sh && sleep 86400; done"
+  postgres:
+    image: postgres:15-alpine
+    container_name: klario-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: klario
+      POSTGRES_USER: klario_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - klario-network
 
-          volumes:
-            postgres_backups:
-              driver: local
+  redis:
+    image: redis:7-alpine
+    container_name: klario-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - klario-network
+
+  klario-backup:
+    image: postgres:15-alpine
+    container_name: klario-backup
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: klario
+      POSTGRES_USER: klario_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_RETENTION_DAYS: 7
+    volumes:
+      - postgres_backups:/backups
+      - ./scripts/backup.sh:/usr/local/bin/backup.sh
+    networks:
+      - klario-network
+    depends_on:
+      - postgres
+    command: |
+      sh -c "while true; do /usr/local/bin/backup.sh && sleep 86400; done"
+
+networks:
+  klario-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  postgres_backups:
+    driver: local
+  redis_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local

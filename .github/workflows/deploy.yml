@@ -73,6 +73,8 @@
                 uses: actions/setup-node@v4
                 with:
                   node-version: ${{ env.NODE_VERSION }}
+
+              - name: Build application
                 run: |
                   npm ci
                   NODE_ENV=production node scripts/build.js
@@ -120,8 +122,7 @@
                   script: |
                     set -e
                     # Prepare deploy dir
-                    rm -rf /tmp/klario-deploy && mv /tmp/klario-deploy ~/
-                    cd ~/klario-deploy
+                    cd /tmp/klario-deploy
 
                     # Load image & copy files
                     docker load < klario-app.tar.gz
@@ -136,7 +137,7 @@
                     # 1) App container health
                     echo "== App Container Health =="
                     for i in {1..10}; do
-                      if docker-compose exec -T klario-app curl -fsS http://localhost/health; then
+                      if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -fsS http://localhost:5000/health; then
                         echo "✅ App container healthy"; break
                       fi
                       sleep 5
