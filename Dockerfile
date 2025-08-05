@@ -1,62 +1,49 @@
-# Multi-stage build for production-ready Klario NFC Platform
-FROM node:20-alpine AS base
+### Multi-stage build for production-ready Klario NFC Platform
 
-# Install dependencies only when needed
-FROM base AS deps
+# 1) Base image with glibc compatibility lib
+FROM node:20-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
+# 2) Install production dependencies
+FROM base AS deps
 COPY package*.json ./
 RUN npm ci --only=production
 
-# Build the application
+# 3) Build the application (including dev deps)
 FROM base AS builder
-WORKDIR /app
-
-# Copy package files and install all dependencies (including dev)
 COPY package*.json ./
 RUN npm ci
-
-# Copy source code
 COPY . .
-
-# Build the application
 RUN node scripts/build.js
 
-# Production image
-FROM base AS runner
+# 4) Final runtime image
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Install curl for health checks (before creating users)
-RUN apk add --no-cache curl
+# Copy app code + prod deps
+COPY --from=deps    /app/node_modules ./node_modules
+COPY --from=builder /app/dist        ./dist
+COPY --from=builder /app/package*.json ./
 
-# Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nodeuser
+# Tools for health checks (optional)
+RUN apk add --no-cache curl libc6-compat \
+ && addgroup -S -g 1001 nodejs \
+ && adduser  -S -u 1001 -G nodejs nodeuser
 
-# Copy built application
-COPY --from=builder --chown=nodeuser:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodeuser:nodejs /app/package*.json ./
-
-# Install production dependencies
-RUN npm ci --only=production && npm cache clean --force
-
-# Create healthcheck script
-RUN printf 'const http=require("http");const options={host:"0.0.0.0",port:5000,path:"/health",timeout:5000};const req=http.request(options,(res)=>{process.exit(res.statusCode===200?0:1)});req.on("error",()=>process.exit(1));req.on("timeout",()=>process.exit(1));req.end();' > /app/healthcheck.js
-
-# Switch to non-root user
 USER nodeuser
-
-# Set Docker environment flag
+ENV NODE_ENV=production
 ENV DOCKER_CONTAINER=true
 
-# Expose port
+# Health check script (built in builder stage)
+COPY --from=builder /app/healthcheck.js ./healthcheck.js
+
+# Expose application port
 EXPOSE 5000
 
-# Health check
+# Docker HEALTHCHECK
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node /app/healthcheck.js
+  CMD node ./healthcheck.js
 
-# Start the application
+# Start application
 CMD ["npm", "start"]

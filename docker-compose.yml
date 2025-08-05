@@ -1,141 +1,102 @@
-version: '3.8'
+    # docker-compose.yml (base)
+    version: '3.8'
 
-services:
-  # Klario Application
-  klario:
-    build: .
-    container_name: klario-app
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - HELLOSMS_USERNAME=${HELLOSMS_USERNAME}
-      - HELLOSMS_PASSWORD=${HELLOSMS_PASSWORD}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
-      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
-      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL}
-      - SESSION_SECRET=${SESSION_SECRET}
-      - KLARNA_USERNAME=${KLARNA_USERNAME}
-      - KLARNA_PASSWORD=${KLARNA_PASSWORD}
-      - KLARNA_ENVIRONMENT=${KLARNA_ENVIRONMENT:-production}
-      - SWISH_PAYEE_ALIAS=${SWISH_PAYEE_ALIAS}
-      - SWISH_CERTIFICATE=${SWISH_CERTIFICATE}
-      - SWISH_ENVIRONMENT=${SWISH_ENVIRONMENT:-production}
-      - SUPER_ADMIN_SETUP_KEY=${SUPER_ADMIN_SETUP_KEY}
-      - BASE_URL=${BASE_URL:-https://klario.se}
-    ports:
-      - "5000:5000"
-    networks:
-      - klario-network
-    depends_on:
-      - postgres
+    services:
+      postgres:
+        image: postgres:15-alpine
+        container_name: klario-postgres
+        restart: unless-stopped
+        environment:
+          POSTGRES_DB: klario
+          POSTGRES_USER: klario_user
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+          - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+        networks:
+          - klario-network
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U klario_user -d klario"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+          start_period: 30s
+
+      redis:
+        image: redis:7-alpine
+        container_name: klario-redis
+        restart: unless-stopped
+        command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+        volumes:
+          - redis_data:/data
+        networks:
+          - klario-network
+        healthcheck:
+          test: ["CMD", "redis-cli --raw ping"]
+          interval: 10s
+          timeout: 3s
+          retries: 5
+
+      klario-app:
+        build: .
+        image: yourregistry/klario:${TAG}
+        container_name: klario-app
+        restart: unless-stopped
+        environment:
+          NODE_ENV: production
+          DATABASE_URL: ${DATABASE_URL}
+          REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+          SESSION_SECRET: ${SESSION_SECRET}
+          SMTP_HOST: ${SMTP_HOST}
+          SMTP_PORT: ${SMTP_PORT}
+          SMTP_USER: ${SMTP_USER}
+          SMTP_PASS: ${SMTP_PASS}
+          SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+          SENDGRID_FROM_EMAIL: ${SENDGRID_FROM_EMAIL}
+          OPENAI_API_KEY: ${OPENAI_API_KEY}
+        networks:
+          - klario-network
+        volumes:
+          - app_logs:/app/logs
+        healthcheck:
+          test: ["CMD", "node", "/app/healthcheck.js"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 40s
+
+      proxy:
+        image: caddy:2-alpine
+        container_name: caddy-proxy
+        restart: unless-stopped
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - ./Caddyfile:/etc/caddy/Caddyfile:ro
+          - caddy_data:/data
+          - caddy_config:/config
+          - /var/log/caddy:/var/log/caddy
+        networks:
+          - klario-network
+        depends_on:
+          - klario-app
+
     volumes:
-      - klario-uploads:/app/uploads
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.klario.rule=Host(`klario.se`) || Host(`www.klario.se`)"
-      - "traefik.http.routers.klario.tls=true"
-      - "traefik.http.routers.klario.tls.certresolver=letsencrypt"
-      - "traefik.http.services.klario.loadbalancer.server.port=5000"
-      - "traefik.http.middlewares.klario-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.klario-insecure.rule=Host(`klario.se`) || Host(`www.klario.se`)"
-      - "traefik.http.routers.klario-insecure.middlewares=klario-redirect"
+      postgres_data:
+        driver: local
+      redis_data:
+        driver: local
+      app_logs:
+        driver: local
+      caddy_data:
+        driver: local
+      caddy_config:
+        driver: local
 
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: klario-postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=klario
-      - POSTGRES_USER=klario
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
     networks:
-      - klario-network
-    ports:
-      - "5432:5432"
-
-  # Redis for Session Storage (Optional - for scaling)
-  redis:
-    image: redis:7-alpine
-    container_name: klario-redis
-    restart: unless-stopped
-    volumes:
-      - redis-data:/data
-    networks:
-      - klario-network
-    command: redis-server --appendonly yes
-
-  # Traefik Reverse Proxy with SSL
-  traefik:
-    image: traefik:v3.0
-    container_name: klario-traefik
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080" # Traefik dashboard (secure in production)
-    environment:
-      - TRAEFIK_API_DASHBOARD=true
-      - TRAEFIK_API_INSECURE=true # Set to false in production
-      - TRAEFIK_ENTRYPOINTS_WEB_ADDRESS=:80
-      - TRAEFIK_ENTRYPOINTS_WEBSECURE_ADDRESS=:443
-      - TRAEFIK_PROVIDERS_DOCKER=true
-      - TRAEFIK_PROVIDERS_DOCKER_EXPOSEDBYDEFAULT=false
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_TLSCHALLENGE=true
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=admin@klario.se
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE=/letsencrypt/acme.json
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - traefik-letsencrypt:/letsencrypt
-    networks:
-      - klario-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`admin.klario.se`)"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.traefik.service=api@internal"
-
-  # Backup Service (runs daily)
-  backup:
-    image: postgres:15-alpine
-    container_name: klario-backup
-    restart: "no"
-    environment:
-      - PGPASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - backup-data:/backups
-      - ./scripts:/scripts
-    networks:
-      - klario-network
-    depends_on:
-      - postgres
-    entrypoint: |
-      sh -c '
-        echo "0 2 * * * cd /scripts && ./backup.sh" | crontab -
-        crond -f
-      '
-
-networks:
-  klario-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
-    driver: local
-  redis-data:
-    driver: local
-  traefik-letsencrypt:
-    driver: local
-  backup-data:
-    driver: local
-  klario-uploads:
-    driver: local
+      klario-network:
+        driver: bridge
+        ipam:
+          config:
+            - subnet: 172.20.0.0/16
