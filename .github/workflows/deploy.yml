@@ -104,12 +104,7 @@
                   username: ${{ env.PROD_USER }}
                   key: ${{ secrets.DO_SSH_KEY }}
                   port: ${{ env.PROD_PORT }}
-                  source: |
-                    klario-app.tar.gz
-                    docker-compose.prod.yml
-                    Caddyfile
-                    .env
-                    scripts/
+                  source: "klario-app.tar.gz,docker-compose.prod.yml,Caddyfile,.env,scripts"
                   target: /tmp/klario-deploy/
 
               - name: Deploy on Droplet
