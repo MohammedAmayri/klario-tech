@@ -123,7 +123,7 @@
                     chmod +x scripts/*.sh
                     
                     # Create .env file directly on server
-                    cat > .env <<'EOF'
+                    cat > .env <<EOF
                     DOMAIN_NAME=getklario.com
                     SESSION_SECRET=${{ secrets.SESSION_SECRET }}
                     DATABASE_URL=${{ secrets.DATABASE_URL }}
