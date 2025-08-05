@@ -82,27 +82,7 @@
               - name: Build Docker image
                 run: docker build -t ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} .
 
-              - name: Generate production .env
-                run: |
-                  cat > .env <<EOF
-                  DOMAIN_NAME=getklario.com
-                  SESSION_SECRET=${{ secrets.SESSION_SECRET }}
-                  DATABASE_URL=${{ secrets.DATABASE_URL }}
-                  POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-                  REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
-                  SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
-                  SENDGRID_FROM_EMAIL=noreply@getklario.com
-                  OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-                  HELLOSMS_USERNAME=${{ secrets.HELLOSMS_USERNAME }}
-                  HELLOSMS_PASSWORD=${{ secrets.HELLOSMS_PASSWORD }}
-                  EOF
-                  
-              - name: Verify .env file created
-                run: |
-                  echo "Checking .env file creation:"
-                  ls -la .env || echo ".env file not found!"
-                  echo "Content preview:"
-                  head -3 .env || echo "Cannot read .env"
+
 
               - name: Save Docker image tarball
                 run: docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_TAG }} | gzip > klario-app.tar.gz
@@ -110,7 +90,7 @@
               - name: Verify files before copy
                 run: |
                   echo "Files to be copied:"
-                  ls -la klario-app.tar.gz docker-compose.prod.yml Caddyfile .env scripts/
+                  ls -la klario-app.tar.gz docker-compose.prod.yml Caddyfile scripts/
                   echo "Current directory contents:"
                   ls -la
 
@@ -121,7 +101,7 @@
                   username: ${{ env.PROD_USER }}
                   key: ${{ secrets.DO_SSH_KEY }}
                   port: ${{ env.PROD_PORT }}
-                  source: "klario-app.tar.gz,docker-compose.prod.yml,Caddyfile,.env,scripts"
+                  source: "klario-app.tar.gz,docker-compose.prod.yml,Caddyfile,scripts"
                   target: /tmp/klario-deploy/
 
               - name: Deploy on Droplet
@@ -142,13 +122,21 @@
                     cd ~/klario
                     chmod +x scripts/*.sh
                     
-                    # Verify .env file exists
-                    if [ ! -f .env ]; then
-                      echo "❌ .env file not found! Files in directory:"
-                      ls -la
-                      exit 1
-                    fi
-                    echo "✅ .env file found with $(wc -l < .env) lines"
+                    # Create .env file directly on server
+                    cat > .env <<'EOF'
+                    DOMAIN_NAME=getklario.com
+                    SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+                    DATABASE_URL=${{ secrets.DATABASE_URL }}
+                    POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+                    REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+                    SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+                    SENDGRID_FROM_EMAIL=noreply@getklario.com
+                    OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+                    HELLOSMS_USERNAME=${{ secrets.HELLOSMS_USERNAME }}
+                    HELLOSMS_PASSWORD=${{ secrets.HELLOSMS_PASSWORD }}
+                    EOF
+                    
+                    echo "✅ .env file created with $(wc -l < .env) lines"
 
                     # Bring up services
                     docker-compose -f docker-compose.prod.yml pull
