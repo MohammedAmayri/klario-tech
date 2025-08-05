@@ -1,0 +1,67 @@
+deployer@ubuntu-s-1vcpu-1gb-amd-lon1-01:~/klario$ docker ps
+CONTAINER ID   IMAGE                COMMAND                  CREATED          STATUS                           PORTS                                                                                         NAMES
+5ba7a2fe83e2   caddy:2-alpine       "caddy run --config …"   23 seconds ago   Up 21 seconds                    0.0.0.0:80->80/tcp, :::80->80/tcp, 0.0.0.0:443->443/tcp, :::443->443/tcp, 443/udp, 2019/tcp   caddy-proxy
+4f838ebe0c1b   klario:latest        "docker-entrypoint.s…"   25 seconds ago   Up 1 second (health: starting)   5000/tcp                                                                                      klario-app
+d51463f159ed   postgres:15-alpine   "docker-entrypoint.s…"   25 seconds ago   Up 22 seconds                    5432/tcp                                                                                      klario-backup
+8e9a7d572680   redis:7-alpine       "docker-entrypoint.s…"   25 seconds ago   Restarting (1) 2 seconds ago                                                                                                   klario-redis
+14cc0be8f776   postgres:15-alpine   "docker-entrypoint.s…"   25 seconds ago   Restarting (1) 2 seconds ago                                                                                                   klario-postgres
+deployer@ubuntu-s-1vcpu-1gb-amd-lon1-01:~/klario$ bash scripts/debug-prod.sh
+=== Container Status ===
+NAMES             STATUS                                     PORTS
+caddy-proxy       Up 42 seconds                              0.0.0.0:80->80/tcp, :::80->80/tcp, 0.0.0.0:443->443/tcp, :::443->443/tcp, 443/udp, 2019/tcp
+klario-app        Up Less than a second (health: starting)   5000/tcp
+klario-backup     Up 44 seconds                              5432/tcp
+klario-redis      Restarting (1) 10 seconds ago
+klario-postgres   Restarting (1) 9 seconds ago
+
+=== Klario App Logs ===
+  throw new Error(
+Error: DATABASE_URL must be set. Did you forget to provision a database?
+
+=== PostgreSQL Logs ===
+       https://www.postgresql.org/docs/current/auth-trust.html
+Error: Database is uninitialized and superuser password is not specified.
+       You must specify POSTGRES_PASSWORD to a non-empty value for the
+       superuser. For example, "-e POSTGRES_PASSWORD=password" on "docker run".
+
+       You may also use "POSTGRES_HOST_AUTH_METHOD=trust" to allow all
+       connections without a password. This is *not* recommended.
+
+       See PostgreSQL documentation about "trust":
+       https://www.postgresql.org/docs/current/auth-trust.html
+
+=== Redis Logs ===
+
+*** FATAL CONFIG FILE ERROR (Redis 7.4.5) ***
+Reading the configuration file, at line 2
+>>> 'requirepass'
+wrong number of arguments
+
+*** FATAL CONFIG FILE ERROR (Redis 7.4.5) ***
+Reading the configuration file, at line 2
+>>> 'requirepass'
+wrong number of arguments
+
+=== Environment Check ===
+✅ .env file exists with 10 lines
+Environment variables defined:
+DOMAIN_NAME
+SESSION_SECRET
+DATABASE_URL
+POSTGRES_PASSWORD
+REDIS_PASSWORD
+SENDGRID_API_KEY
+SENDGRID_FROM_EMAIL
+OPENAI_API_KEY
+HELLOSMS_USERNAME
+HELLOSMS_PASSWORD
+
+=== Docker Compose Status ===
+     Name                    Command                       State                                                     Ports
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+caddy-proxy       caddy run --config /etc/ca ...   Up                      2019/tcp, 0.0.0.0:443->443/tcp,:::443->443/tcp, 443/udp, 0.0.0.0:80->80/tcp,:::80->80/tcp
+klario-app        docker-entrypoint.sh npm start   Up (health: starting)   5000/tcp
+klario-backup     docker-entrypoint.sh sh -c ...   Up                      5432/tcp
+klario-postgres   docker-entrypoint.sh postgres    Restarting
+klario-redis      docker-entrypoint.sh redis ...   Restarting
+deployer@ubuntu-s-1vcpu-1gb-amd-lon1-01:~/klario$
