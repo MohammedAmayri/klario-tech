@@ -88,10 +88,13 @@
                   DOMAIN_NAME=getklario.com
                   SESSION_SECRET=${{ secrets.SESSION_SECRET }}
                   DATABASE_URL=${{ secrets.DATABASE_URL }}
+                  POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
                   SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
                   SENDGRID_FROM_EMAIL=noreply@getklario.com
                   OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+                  HELLOSMS_USERNAME=${{ secrets.HELLOSMS_USERNAME }}
+                  HELLOSMS_PASSWORD=${{ secrets.HELLOSMS_PASSWORD }}
                   EOF
 
               - name: Save Docker image tarball
@@ -124,6 +127,14 @@
                     mkdir -p ~/klario && cp -r * ~/klario/
                     cd ~/klario
                     chmod +x scripts/*.sh
+                    
+                    # Verify .env file exists
+                    if [ ! -f .env ]; then
+                      echo "❌ .env file not found! Files in directory:"
+                      ls -la
+                      exit 1
+                    fi
+                    echo "✅ .env file found with $(wc -l < .env) lines"
 
                     # Bring up services
                     docker-compose -f docker-compose.prod.yml pull
