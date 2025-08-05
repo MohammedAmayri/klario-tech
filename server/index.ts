@@ -41,42 +41,53 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  console.log('Starting Klario application...');
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Docker container:', process.env.DOCKER_CONTAINER === 'true' ? 'Yes' : 'No');
+  
+  try {
+    const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    console.error('Server error:', err);
-    if (!res.headersSent) {
-      res.status(status).json({ message });
+      console.error('Server error:', err);
+      if (!res.headersSent) {
+        res.status(status).json({ message });
+      }
+    });
+
+    // importantly only setup vite in development and after
+    // setting up all the other routes so the catch-all route
+    // doesn't interfere with the other routes
+    if (app.get("env") === "development") {
+      const { setupVite } = await import("./vite");
+      await setupVite(app, server);
+    } else {
+      const { serveStatic } = await import("./static");
+      serveStatic(app);
     }
-  });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    const { setupVite } = await import("./vite");
-    await setupVite(app, server);
-  } else {
-    const { serveStatic } = await import("./static");
-    serveStatic(app);
+    // Serve the app on the configured port
+    // In production, use environment PORT or default to 5000
+    const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      console.log(`${new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit", 
+        hour12: true,
+      })} [express] serving on port ${port}`);
+      console.log('✅ Klario application started successfully');
+    });
+  } catch (error) {
+    console.error('❌ Failed to start Klario application:', error);
+    console.error('Stack trace:', error instanceof Error ? error.stack : error);
+    process.exit(1);
   }
-
-  // Serve the app on the configured port
-  // In production, use environment PORT or default to 5000
-  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    console.log(`${new Date().toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      second: "2-digit", 
-      hour12: true,
-    })} [express] serving on port ${port}`);
-  });
 })();

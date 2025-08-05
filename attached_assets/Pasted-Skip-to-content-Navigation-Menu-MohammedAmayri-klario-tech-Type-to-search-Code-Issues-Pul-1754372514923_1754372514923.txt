@@ -1,0 +1,55 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Resolve deployment issues to ensure smooth system functionality and r… #25
+Jobs
+Run details
+build-and-deploy
+failed 8 hours ago in 5m 1s
+Search logs
+3s
+3s
+2s
+0s
+7s
+31s
+16s
+16s
+2s
+21s
+3m 15s
+out: caddy-proxy   | {"level":"info","ts":1754342152.9893138,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":1754342162.9810603,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":1754342172.9859638,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":1754342182.983***8,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":1754342192.9814932,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":175434***02.9854715,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: caddy-proxy   | {"level":"info","ts":175434***12.9896262,"logger":"http.handlers.reverse_proxy.health_checker.active","msg":"HTTP request failed","host":"klario-app:5000","error":"Get \"http://klario-app:5000/health\": dial tcp: lookup klario-app on 127.0.0.11:53: server misbehaving"}
+out: === Container Status ===
+out:            Name                         Command                  State                                                 Ports                                          
+out: ----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+out: 605feb8516a3_klario-app      docker-entrypoint.sh npm start   Exit 1                                                                                                  
+out: 7c332665785a_klario-backup   docker-entrypoint.sh sh -c ...   Exit 1                                                                                                  
+out: caddy-proxy                  caddy run --config /etc/ca ...   Up             2019/tcp, 0.0.0.0:443->443/tcp,:::443->443/tcp, 443/udp, 0.0.0.0:80->80/tcp,:::80->80/tcp
+out: klario-postgres              docker-entrypoint.sh postgres    Up (healthy)   127.0.0.1:5432->5432/tcp                                                                 
+out: klario-redis                 docker-entrypoint.sh redis ...   Up (healthy)   127.0.0.1:6379->6379/tcp                                                                 
+out: === Checking if curl is available ===
+out: curl not found
+2025/08/04 21:16:56 Process exited with status 1
+0s
+0s
+1s
+0s
