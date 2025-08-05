@@ -1,0 +1,87 @@
+Skip to content
+Navigation Menu
+MohammedAmayri
+klario-tech
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+Deploy Klario to Production
+Add debugging tools to diagnose container startup issues after deploy… #36
+Jobs
+Run details
+build-and-deploy
+failed 4 minutes ago in 1m 43s
+Search logs
+1s
+3s
+2s
+0s
+1s
+14s
+27s
+17s
+0s
+15s
+21s
+
+# 2) Proxy/SSL health
+echo "== Proxy/SSL Health =="
+for i in {1..10}; do
+  if curl -fsS https://getklario.com/health; then
+    echo "✅ Proxy & SSL healthy"; break
+  fi
+  sleep 5
+done
+
+echo "🚀 Deployment completed successfully!"
+
+======END======
+out: The image klario:latest already exists, renaming the old one with ID sha256:123ada68631aa60b60a278c216daa23ba2dc2077a88bed5a6b4bbb4fea1d3ae0 to empty string
+out: Loaded image: klario:latest
+out: ✅ .env file created with 10 lines
+err: Pulling postgres    ... 
+err: Pulling redis       ... 
+err: Pulling caddy-proxy ... 
+err: Pulling redis       ... pulling from library/redis
+err: Pulling redis       ... digest: sha256:bb186d083732f669da...
+err: Pulling redis       ... status: image is up to date for r...
+err: Pulling postgres    ... pulling from library/postgres
+err: Pulling redis       ... done
+err: Pulling caddy-proxy ... pulling from library/caddy
+err: Pulling postgres    ... digest: sha256:1414298ea93186123a...
+err: Pulling postgres    ... status: image is up to date for p...
+err: Pulling postgres    ... done
+err: Pulling caddy-proxy ... digest: sha256:ae4458638da8e1a91a...
+err: Pulling caddy-proxy ... status: image is up to date for c...
+err: Pulling caddy-proxy ... done
+err: klario-redis is up-to-date
+err: klario-postgres is up-to-date
+err: klario-backup is up-to-date
+err: Recreating klario-app ... 
+err: ERROR: for klario-app  'ContainerConfig'
+err: ERROR: for klario-app  'ContainerConfig'
+err: Traceback (most recent call last):
+err:   File "/usr/bin/docker-compose", line 33, in <module>
+err:     sys.exit(load_entry_point('docker-compose==1.29.2', 'console_scripts', 'docker-compose')())
+err:              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+err:   File "/usr/lib/python3/dist-packages/compose/cli/main.py", line 81, in main
+err:     command_func()
+err:   File "/usr/lib/python3/dist-packages/compose/cli/main.py", line 203, in perform_command
+err:     handler(command, command_options)
+err:   File "/usr/lib/python3/dist-packages/compose/metrics/decorator.py", line 18, in wrapper
+err:     result = fn(*args, **kwargs)
+err:              ^^^^^^^^^^^^^^^^^^^
+err:   File "/usr/lib/python3/dist-packages/compose/cli/main.py", line 1184, in up
+err:     to_attach = up(False)
+0s
+0s
+0s
+0s
