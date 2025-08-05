@@ -144,12 +144,31 @@
                     # Bring up all services
                     docker-compose -f docker-compose.prod.yml up -d
 
+                    # Wait for containers to start
+                    sleep 10
+                    
+                    # Check container status
+                    echo "== Container Status =="
+                    docker-compose -f docker-compose.prod.yml ps
+                    
+                    # Check logs for errors
+                    echo "== App Logs =="
+                    docker-compose -f docker-compose.prod.yml logs --tail=20 klario-app || true
+                    
+                    echo "== Postgres Logs =="
+                    docker-compose -f docker-compose.prod.yml logs --tail=10 postgres || true
+                    
+                    echo "== Redis Logs =="
+                    docker-compose -f docker-compose.prod.yml logs --tail=10 redis || true
+                    
                     # 1) App container health
                     echo "== App Container Health =="
                     for i in {1..10}; do
                       if docker-compose -f docker-compose.prod.yml exec -T klario-app curl -fsS http://localhost:5000/health; then
                         echo "✅ App container healthy"; break
                       fi
+                      echo "Attempt $i/10 failed, checking logs..."
+                      docker-compose -f docker-compose.prod.yml logs --tail=5 klario-app || true
                       sleep 5
                     done
 
